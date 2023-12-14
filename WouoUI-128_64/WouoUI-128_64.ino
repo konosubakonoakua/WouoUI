@@ -65,7 +65,7 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, SCL, SDA, RST);     // 分辨�
 enum 
 {
   M_WINDOW,
-  M_SLEEP,
+  //M_SLEEP,
     M_MAIN, 
       M_EDITOR,
         M_KNOB,
@@ -98,7 +98,7 @@ typedef struct MENU
 
 M_SELECT main_menu[]
 {
-  {"Sleep"},
+  //{"Sleep"},
   {"Editor"},
   {"Volt"},
   {"Setting"},
@@ -276,6 +276,7 @@ M_SELECT about_menu[]
 
 PROGMEM const uint8_t main_icon_pic[][120]
 {
+  /*
   {
     0xFF,0xFF,0xFF,0x3F,0xFF,0xFF,0xFF,0x3F,0xFF,0xFF,0xFF,0x3F,0xFF,0xFF,0xF1,0x3F,
     0xFF,0xFF,0xC3,0x3F,0xFF,0xFF,0x87,0x3F,0xFF,0xFF,0x07,0x3F,0xFF,0xFF,0x0F,0x3E,
@@ -286,6 +287,7 @@ PROGMEM const uint8_t main_icon_pic[][120]
     0x7F,0x00,0xC0,0x3F,0xFF,0x01,0xF0,0x3F,0xFF,0x07,0xFC,0x3F,0xFF,0xFF,0xFF,0x3F,
     0xFF,0xFF,0xFF,0x3F,0xFF,0xFF,0xFF,0x3F
   },
+  */
   {
     0xFF,0xFF,0xFF,0x3F,0xFF,0xFF,0xFF,0x3F,0xFF,0xFF,0xFF,0x3F,0xFF,0xF9,0xE7,0x3F,
     0xFF,0xF9,0xE7,0x3F,0xFF,0xF9,0xE7,0x3F,0xFF,0xF0,0xE7,0x3F,0x7F,0xE0,0xE7,0x3F,
@@ -330,7 +332,8 @@ uint16_t  buf_len;                  //缓冲长度
 #define   UI_DEPTH            20    //最深层级数
 #define   UI_MNUMB            100   //菜单数量
 #define   UI_PARAM            16    //参数数量
-enum 
+
+enum
 {
   DISP_BRI,     //屏幕亮度
   TILE_ANI,     //磁贴动画速度
@@ -349,15 +352,16 @@ enum
   KNOB_DIR,     //旋钮方向切换开关
   DARK_MODE,    //黑暗模式开关
 };
-struct 
+struct
 {
   bool      init;
   uint8_t   num[UI_MNUMB];
   uint8_t   select[UI_DEPTH];
   uint8_t   layer;
-  uint8_t   index = M_SLEEP;
-  uint8_t   state = S_NONE;
-  bool      sleep = true;
+  uint8_t   index = M_MAIN;
+  uint8_t   state = S_LAYER_IN; // main as a layer
+  //uint8_t   state = S_LAYER_OUT; // main as a layer, coredump
+  //bool      sleep = false;
   uint8_t   fade = 1;
   uint8_t   param[UI_PARAM];
 } ui;
@@ -731,7 +735,7 @@ void window_value_init(char title[], uint8_t select, uint8_t *value, uint8_t max
   win.min = min;
   win.step = step;
   win.bg = bg;
-  win.index = index;  
+  win.index = index;
   ui.index = M_WINDOW;
   ui.state = S_WINDOW;
 }
@@ -788,20 +792,24 @@ void tile_param_init()
   tile.title_y_trg = tile.title_y_trg_calc;
 }
 
+#if 0
 //进入睡眠时的初始化
 void sleep_param_init()
 {
   u8g2.setDrawColor(0);
   u8g2.drawBox(0, 0, DISP_W, DISP_H);
   u8g2.setPowerSave(1);
-  ui.state = S_NONE;  
+  ui.state = S_NONE;
   ui.sleep = true;
+#ifndef SIMULATOR_MODE
   if (eeprom.change)
   {
     eeprom_write_all_data();
     eeprom.change = false;
   }
+#endif
 }
+#endif
 
 //旋钮设置页初始化
 void knob_param_init() { check_box_v_init(knob.param); }
@@ -877,7 +885,7 @@ void layer_init_out()
   ui.state = S_FADE;
   switch (ui.index)
   {
-    case M_SLEEP: sleep_param_init(); break;    //主菜单进入睡眠页，检查是否需要写EEPROM
+    //case M_SLEEP: sleep_param_init(); break;    //主菜单进入睡眠页，检查是否需要写EEPROM
     case M_MAIN:  tile_param_init();  break;    //不管什么页面进入主菜单时，动画初始化
   }
 }
@@ -918,7 +926,7 @@ void fade()
       case 3: for (uint16_t i = 0; i < buf_len; ++i)  if (i % 2 == 0) buf_ptr[i] = buf_ptr[i] | 0x55; break;
       case 4: for (uint16_t i = 0; i < buf_len; ++i)  if (i % 2 == 0) buf_ptr[i] = buf_ptr[i] | 0x00; break;
       default: ui.state = S_NONE; ui.fade = 0; break;
-    }    
+    }
   }
   ui.fade++;
 }
@@ -1312,6 +1320,7 @@ void window_proc()
 
 /********************************** 分页面处理函数 **********************************/
 
+#if 0
 //睡眠页面处理函数
 void sleep_proc()
 {
@@ -1352,6 +1361,7 @@ void sleep_proc()
     }
   }
 }
+#endif
 
 //主菜单处理函数，磁贴类模板
 void main_proc()
@@ -1359,10 +1369,17 @@ void main_proc()
   tile_show(main_menu, main_icon_pic);
   if (btn.pressed) { btn.pressed = false; switch (btn.id) { case BTN_ID_CW: case BTN_ID_CC: tile_rotate_switch(); break; case BTN_ID_SP: switch (ui.select[ui.layer]) {
 
+#if 0
         case 0: ui.index = M_SLEEP;   ui.state = S_LAYER_OUT; break;
         case 1: ui.index = M_EDITOR;  ui.state = S_LAYER_IN;  break;
         case 2: ui.index = M_VOLT;    ui.state = S_LAYER_IN;  break;
         case 3: ui.index = M_SETTING; ui.state = S_LAYER_IN;  break;
+#else
+        // TODO: ui state
+        case 0: ui.index = M_EDITOR;  ui.state = S_LAYER_IN;  break;
+        case 1: ui.index = M_VOLT;    ui.state = S_LAYER_IN;  break;
+        case 2: ui.index = M_SETTING; ui.state = S_LAYER_IN;  break;
+#endif
       }
     }
     if (!tile.select_flag && ui.init) { tile.indi_x = 0; tile.title_y = tile.title_y_calc; }
@@ -1572,15 +1589,15 @@ void ui_proc()
   u8g2.sendBuffer();
   switch (ui.state)
   {
-    case S_FADE:          fade();                   break;  //转场动画
-    case S_WINDOW:        window_param_init();      break;  //弹窗初始化
-    case S_LAYER_IN:      layer_init_in();          break;  //层级初始化
-    case S_LAYER_OUT:     layer_init_out();         break;  //层级初始化
+    case S_FADE:          fade();                   break;  //转场动画, fade-->none
+    case S_WINDOW:        window_param_init();      break;  //弹窗初始化, windor-->none
+    case S_LAYER_IN:      layer_init_in();          break;  //层级初始化, in-->fade
+    case S_LAYER_OUT:     layer_init_out();         break;  //层级初始化, out-->fade
   
     case S_NONE: u8g2.clearBuffer(); switch (ui.index)      //直接选择页面
     {
       case M_WINDOW:      window_proc();            break;
-      case M_SLEEP:       sleep_proc();             break;
+      //case M_SLEEP:       sleep_proc();             break;
       case M_MAIN:        main_proc();              break;
       case M_EDITOR:      editor_proc();            break;
       case M_KNOB:        knob_proc();              break;
