@@ -45,19 +45,21 @@
 #define PB0 0
 #define PB1 0
 
-
 #include <SDL_keycode.h>
 
-#define PB12 SDLK_q
-#define PB13 SDLK_w
-#define PB14 SDLK_e
+#define PB12 SDLK_j
+#define PB13 SDLK_k
+#define PB14 SDLK_l
 
-#define      PB6 0
-#define      PB7 0
-#define      U8X8_PIN_NONE (-1)
+#define SDL_UIKEY_LEFT 'k'
+#define SDL_UIKEY_RIGHT 'j'
+#define SDL_UIKEY_PRESS 'i'
+#define SDL_UIKEY_LONGPRESS 'o'
+
+#define PB6 0
+#define PB7 0
+#define U8X8_PIN_NONE (-1)
 
 #define U8G2_SSD1306_128X64_NONAME_F_HW_I2C U8G2_SDL_128X64
 
 void ui_param_init();
-
-

@@ -4,7 +4,7 @@
 # 说明
 基于SDL2,移植u8g2,添加Arduino兼容层,模拟必要的Arduino API,模拟编码、按键长短按时序,使WouoUI在能在PC平台编译运。
 
-键盘QWER分别代表编码器左、右旋转,短按,长按。(注意把电脑输入法关了)
+键盘kjio分别代表编码器左、右旋转,短按,长按。(注意把电脑输入法关了)
 
 EEPROM,ADC,HID无实际功能。
 # Windows编译
@@ -16,3 +16,10 @@ EEPROM,ADC,HID无实际功能。
 6. `cd WouoUI/Third-party-design/Emulator && cmake -G Ninja -B build`
 7. `cd build && ninja`
 8. `./WouoUI.exe`
+
+# Linux compiling
+- `git clone --recurse-submodules https://github.com/RQNG/WouoUI.git`
+- `cd WouoUI/Third-party-design/Emulator && cmake -Bbuild`
+- `cd build && make -j8`
+- `./WouoUI`
+

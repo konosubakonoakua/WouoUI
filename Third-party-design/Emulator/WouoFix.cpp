@@ -21,7 +21,6 @@ void knob_inter();
 void btn_scan();
 
 
-
 int digitalRead(int pin) {
     if (takeOver) {
         if (longPress == 0) {
@@ -44,7 +43,10 @@ int digitalRead(int pin) {
                 break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
-                    case 'q': {
+                    case 'q':
+                        exit(0);
+                        break;
+                    case SDL_UIKEY_LEFT: {
                         // 模拟编码器
                         takeOver = true;
                         keyStatus[PB12] = 1;
@@ -63,7 +65,7 @@ int digitalRead(int pin) {
 
                     }
                         break;
-                    case 'w': {
+                    case SDL_UIKEY_RIGHT: {
                         // 模拟编码器
                         takeOver = true;
                         keyStatus[PB12] = 1;
@@ -82,7 +84,7 @@ int digitalRead(int pin) {
 
                     }
                         break;
-                    case 'e': {
+                    case SDL_UIKEY_PRESS: {
                         // 模拟短按
                         takeOver = true;
                         keyStatus[PB14] = 1;
@@ -95,7 +97,7 @@ int digitalRead(int pin) {
                         takeOver = false;
                     }
                         break;
-                    case 'r': {
+                    case SDL_UIKEY_LONGPRESS: {
                         // 模拟长按
                         takeOver = true;
                         keyStatus[PB14] = 1;
@@ -115,10 +117,10 @@ int digitalRead(int pin) {
                 break;
             case SDLK_UP:
                 switch (event.key.keysym.sym) {
-                    case 'e':
+                    case SDL_UIKEY_PRESS:
 //                        keyStatus[PB14] = 0;
                         break;
-                    case 'r':
+                    case SDL_UIKEY_LONGPRESS:
                         break;
                 }
         }
